@@ -10,6 +10,7 @@ class FunLearningFactor(object):
         self.flf_matrix = []
 
         # Populate tutor dict.
+        # index => {name, len, odd}
         self.t_dict = {}
         with open(tutors_file, 'r') as tf:
             for i, tutor in enumerate(tf.readlines()):
@@ -18,6 +19,7 @@ class FunLearningFactor(object):
                     'odd': True if len(tutor) % 2 != 0 else False}
 
         # Populate player dict.
+        # index => {name, len, num_vowels, num_consonants}
         self.p_dict = {}
         with open(players_file, 'r') as pf:
             for i, player in enumerate(pf.readlines()):
@@ -37,17 +39,21 @@ class FunLearningFactor(object):
             exit(1)
 
     def fill_flf_matrix(self):
-        for t_itor in xrange(len(self.t_dict)):
+        """Compute flf of tutor-player pairs and insert into a matrix."""
+
+        for t_itor in xrange(len(self.t_dict)):  # Iterate tutors.
             matrix_row = []
-            for p_itor in xrange(len(self.p_dict)):
+            for p_itor in xrange(len(self.p_dict)):  # Iterate players.
+                # Computer flf between a tutor and a player.
                 flf = self.calc_flf(self.t_dict[t_itor], self.p_dict[p_itor])
                 matrix_row.append(flf)
-            self.flf_matrix.append(matrix_row)  # add new row
+            self.flf_matrix.append(matrix_row)
 
     def calc_flf(self, tutor, player):
         """Calculates flf of a tutor-player pair."""
 
         flf = None
+
         if tutor['odd']:
             flf = player['num_vowels'] * 1.5
         else:
@@ -59,17 +65,31 @@ class FunLearningFactor(object):
 
         return flf
 
-    def print_flf_matrix(self):
-        """Return a string representation of the flf_matrix."""
+    def print_flf_matrix(self, msg=None):
+        """Return a string representation of the flf matrix."""
+
         matrix_str = '\n'
-        matrix_dim = len(self.t_dict)  # Both tutor and player size is equal.
+        if msg:
+            matrix_str += msg + '\n'
+
+        matrix_dim = len(self.t_dict)
+
+        # Print out the vertical line for matrix.
+        matrix_str += matrix_dim * '--' + '-\n'
+
         for row in xrange(matrix_dim):
             matrix_str += '|'
             for col in xrange(matrix_dim):
                 matrix_str += str(self.flf_matrix[row][col]) + '|'
             matrix_str += '\n'
 
-        # Print out the vertical line for board.
+        # Print out the vertical line for matrix.
         matrix_str += matrix_dim * '--' + '-\n'
 
         return matrix_str
+
+    def get_tutor_player_names(self, tutor, player):
+        """Given a tutor and player index, return associated names."""
+
+        return '(%s, %s)' % (self.t_dict[tutor]['name'],
+                             self.p_dict[player]['name'])
